@@ -164,6 +164,12 @@ class Mitsubishi:
     def __init__(self, gpio_pin, log_level=ir_sender.LogLevel.Minimal):
         self.log_level = log_level
         self.gpio_pin = gpio_pin
+        
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        pass
 
     def power_off(self):
         """
