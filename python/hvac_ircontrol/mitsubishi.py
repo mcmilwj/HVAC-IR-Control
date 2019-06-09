@@ -163,21 +163,7 @@ class Mitsubishi:
     """
     def __init__(self, gpio_pin, log_level=ir_sender.LogLevel.Minimal):
         self.log_level = log_level
-        self.sender = ir_sender.IrSender(gpio_pin, "NEC", dict(
-            leading_pulse_duration=Delay.HdrMark,
-            leading_gap_duration=Delay.HdrSpace,
-            one_pulse_duration=Delay.BitMark,
-            one_gap_duration=Delay.OneSpace,
-            zero_pulse_duration=Delay.BitMark,
-            zero_gap_duration=Delay.ZeroSpace,
-            trailing_pulse_duration=Delay.RptMark,
-            trailing_gap_duration=Delay.RptSpace), log_level)
-        
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_value, traceback):
-        pass
+        self.gpio_pin = gpio_pin
 
     def power_off(self):
         """
@@ -228,6 +214,17 @@ class Mitsubishi:
             print(message)
 
     def __send_command(self, climate_mode, temperature, fan_mode, vanne_vertical_mode, vanne_horizontal_mode, isee_mode, area_mode, start_time, end_time, powerful, power_mode):
+
+        sender = ir_sender.IrSender(self.gpio_pin, "NEC", dict(
+            leading_pulse_duration=Delay.HdrMark,
+            leading_gap_duration=Delay.HdrSpace,
+            one_pulse_duration=Delay.BitMark,
+            one_gap_duration=Delay.OneSpace,
+            zero_pulse_duration=Delay.BitMark,
+            zero_gap_duration=Delay.ZeroSpace,
+            trailing_pulse_duration=Delay.RptMark,
+            trailing_gap_duration=Delay.RptSpace), self.log_level)
+
         # data array is a valid trame, only byte to be chnaged will be updated.
         data = [0x23, 0xCB, 0x26, 0x01, 0x00, 0x20,
                 0x08, 0x06, 0x30, 0x45, 0x67, 0x00,
@@ -291,4 +288,4 @@ class Mitsubishi:
         self.__log(ir_sender.LogLevel.Verbose, 'CRC: {0:03d}  {0:02x}  {0:08b}'.format(data[Index.CRC]))
         self.__log(ir_sender.LogLevel.Verbose, '')
 
-        self.sender.send_data(data, Constants.MaxMask, True, Constants.NbPackets)
+        sender.send_data(data, Constants.MaxMask, True, Constants.NbPackets)
